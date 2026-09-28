@@ -17,6 +17,11 @@ Reference: see `docs/08-sop-and-discipline.md` in the parent `nousviz-plugin-aut
 
 ## Implementation phases
 
+**Blocked on B400** (`tickets/B400-*.md`): NousViz's "Public Repository" install mode posts only
+the plugin ID and fails the registry lookup, ignoring the URL the form collected. Install this
+plugin through **Private (Token)** or **Private (SSH Key)** — both send the URL and both work
+against the public repo — until core fixes it.
+
 ### v0.2.3 — Install/update over HTTPS
 
 **STATUS: built 2026-09-28.**
