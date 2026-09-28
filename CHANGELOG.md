@@ -6,6 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Fixed — v0.2.3: Install and update over HTTPS
+- The plugin now points at its public HTTPS repository, so installing and updating needs no deploy key. Install with "Install from Git" and `https://github.com/statsdroneadmin/plugin-voonix-analytics.git` — installing by name doesn't work, because that searches NousViz's own registry.
+
 ### Changed — v0.2.2: MIT licence
 - The plugin is now MIT licensed (LICENSE file included), published by John Wright.
 - Voonix's own documentation is no longer copied into this repo. `docs-voonix-api/API_NOTES.md` records what the plugin relies on.

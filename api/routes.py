@@ -50,7 +50,7 @@ from voonix_analytics_client import VoonixError  # noqa: E402
 
 router = APIRouter()
 PLUGIN_SLUG = "voonix-analytics"
-PLUGIN_VERSION = "0.2.2"   # bump alongside plugin.yaml version
+PLUGIN_VERSION = "0.2.3"   # bump alongside plugin.yaml version
 BASE = f"/plugins/{PLUGIN_SLUG}"
 MAX_WRITE_ROWS = 100
 

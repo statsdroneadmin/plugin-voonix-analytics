@@ -33,7 +33,7 @@ from typing import Any
 from urllib.parse import quote
 
 
-USER_AGENT = "nousviz-plugin-voonix-analytics/0.2.2"
+USER_AGENT = "nousviz-plugin-voonix-analytics/0.2.3"
 RETRY_STATUS = {429, 500, 502, 503, 504}
 
 

@@ -17,6 +17,27 @@ Reference: see `docs/08-sop-and-discipline.md` in the parent `nousviz-plugin-aut
 
 ## Implementation phases
 
+### v0.2.3 — Install/update over HTTPS
+
+**STATUS: built 2026-09-28.**
+
+**Ticket.** Operator hit `Plugin 'voonix-analytics' not found in official or community registry.
+Provide a repository_url in the request body to install a private plugin.` The registry is
+NousViz's curated list and this plugin isn't in it, so it must be installed via the repo-URL
+form. Separately the manifest still declared the SSH `repository:` and `visibility: fully_private`
+after the repo went public — and the marketplace clones from `repository:` on install
+(`docs/02-plugin-contract.md:66`), which would keep demanding a deploy key on update.
+
+**Plan.** Point `repository:` at the public HTTPS URL, set `visibility: public`, document the
+install route in the README and long_description, bump to 0.2.3.
+
+**Test plan.**
+- [ ] Install from Git with the HTTPS URL succeeds with no deploy key
+- [ ] `/health-check` reports 0.2.3
+- [ ] Update (not reinstall) works on a later tag without a key
+
+**CHANGELOG stub.** See `CHANGELOG.md` [Unreleased].
+
 ### v0.2.2 — MIT licence, and Voonix's documentation out of the repo
 
 **STATUS: built 2026-09-28.**

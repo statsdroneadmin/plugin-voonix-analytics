@@ -3,7 +3,7 @@
 
 name: voonix-analytics
 display_name: Voonix Analytics
-version: 0.2.2
+version: 0.2.3
 description: >
   Mirrors your Voonix affiliate data into NousViz — advertisers, logins and
   deals, campaigns, sites, payers, advertiser and site earnings, invoiceable
@@ -15,13 +15,13 @@ license: MIT
 icon: bar-chart-2
 category: analytics
 tags: [voonix, affiliate, igaming, earnings]
-visibility: fully_private
+visibility: public
 
 publisher:
   slug: johnwright
   name: John Wright
 
-repository: git@github.com:statsdroneadmin/plugin-voonix-analytics.git
+repository: https://github.com/statsdroneadmin/plugin-voonix-analytics.git
 
 
 long_description: |
@@ -66,6 +66,11 @@ long_description: |
   anything that old.
 
   ## Setup
+
+  Install with **Install from Git** and this URL — the repo is public, so no
+  deploy key is needed:
+
+      https://github.com/statsdroneadmin/plugin-voonix-analytics.git
 
   1. In Voonix, create an API key.
   2. In Settings, enter your Voonix address and the API key, then Save.

@@ -77,7 +77,11 @@ Exports never contain passwords or affiliate keys, because the plugin never stor
 
 ## Setup
 
-1. Install via "Install from Git" with `git@github.com:statsdroneadmin/plugin-voonix-analytics.git` (add a per-repo deploy key first, B204).
+1. In NousViz, open the plugin directory and use **"Install from Git" / "Add private plugin"** — the field where you paste a repository URL. (Installing by name only works for plugins in NousViz's own registry; this one isn't in it.) Paste:
+   ```
+   https://github.com/statsdroneadmin/plugin-voonix-analytics.git
+   ```
+   The repo is public, so no deploy key is needed.
 2. Click **Trust this plugin**, then hard-refresh.
 3. Settings: **Voonix address** (the address you log in at, e.g. `https://yourcompany.voonix.net`) and **API key** → Save.
 4. **Test connection** → **Run sync**.
