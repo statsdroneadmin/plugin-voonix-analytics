@@ -1,0 +1,11 @@
+# dashboards/advertiser-earnings.yaml — Advertiser earnings report tab (VoonixReport widget; definition in src/voonix_analytics_catalog.py).
+title: Advertiser earnings
+db_engine: postgres
+
+panels:
+  - id: report
+    type: custom
+    component: VoonixReport
+    config:
+      report: advertiser_earnings
+      default_days: 30

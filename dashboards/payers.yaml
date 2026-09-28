@@ -1,0 +1,11 @@
+# dashboards/payers.yaml — Payers (VoonixManager widget; resources in src/voonix_analytics_catalog.py).
+title: Payers
+db_engine: postgres
+
+panels:
+  - id: manage_payers
+    type: custom
+    component: VoonixManager
+    config:
+      resource: payers
+

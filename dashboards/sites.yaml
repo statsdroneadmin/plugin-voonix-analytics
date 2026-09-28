@@ -1,0 +1,11 @@
+# dashboards/sites.yaml — Sites (VoonixManager widget; resources in src/voonix_analytics_catalog.py).
+title: Sites
+db_engine: postgres
+
+panels:
+  - id: manage_sites
+    type: custom
+    component: VoonixManager
+    config:
+      resource: sites
+

@@ -1,0 +1,296 @@
+# plugin.yaml — voonix-analytics
+# Reference: docs/02-plugin-contract.md in the nousviz-plugin-authoring guide.
+
+name: voonix-analytics
+display_name: Voonix Analytics
+version: 0.2.2
+description: >
+  Mirrors your Voonix affiliate data into NousViz — advertisers, logins and
+  deals, campaigns, sites, payers, advertiser and site earnings, invoiceable
+  earnings, payouts, custom stats and data-quality checks — lets admins
+  create, edit and delete Voonix records from NousViz, and exports
+  everything as Excel, CSV, SQLite, SQL or JSON.
+
+license: MIT
+icon: bar-chart-2
+category: analytics
+tags: [voonix, affiliate, igaming, earnings]
+visibility: fully_private
+
+publisher:
+  slug: johnwright
+  name: John Wright
+
+repository: git@github.com:statsdroneadmin/plugin-voonix-analytics.git
+
+
+long_description: |
+  ## Unofficial
+
+  An independent plugin, not affiliated with, endorsed by, or supported by
+  Voonix. "Voonix" is the trademark of its owner and is used here only to say
+  what this plugin connects to. It uses Voonix's documented API with the
+  account holder's own API key, and reads only that account's own data.
+
+  ## What this plugin does
+
+  Connects to your Voonix account through the Voonix API v3 and keeps a copy
+  of your data in NousViz, refreshed every 6 hours:
+
+  - **Reports** — advertiser earnings (daily, per campaign), site earnings,
+    invoiceable earnings, payouts, custom stats, datamonitor discrepancies.
+  - **Accounts** — advertisers, logins with their deals and history deals,
+    campaigns with campaign deals, sites, payers, data validation.
+
+  An Overview tab summarises commission, FTDs, CPAs, clicks and payouts; each
+  report has its own tab with a date range, grouping, sorting and downloads
+  (Excel, CSV, JSON).
+
+  **Admins can change Voonix from NousViz**: create, edit and delete
+  advertisers, logins, history deals, campaign deals, custom stats and sites,
+  and edit or delete campaigns. Every change is recorded on the Sync tab.
+  Switch this off with "Allow changes in Voonix" in Settings.
+
+  ## Export
+
+  The **Export** tab downloads every table as an Excel workbook, CSV files,
+  a SQLite database, a PostgreSQL SQL dump or JSON Lines — pick tables, a
+  date range, and whether to include the raw Voonix records.
+
+  ## History
+
+  The first sync fetches up to *History to fetch* months (default 24). Every
+  later sync re-fetches the last *Months to re-check* (default 3) so restated
+  or clawed-back numbers are corrected. **Fetch older history** pulls another
+  12 months further back each time; the Sync tab shows whether Voonix had
+  anything that old.
+
+  ## Setup
+
+  1. In Voonix, create an API key.
+  2. In Settings, enter your Voonix address and the API key, then Save.
+  3. Click **Test connection**, then **Run sync**.
+  4. Click **Trust this plugin** when the banner appears, then hard-refresh.
+
+  Passwords and affiliate-program keys (key1/key2) returned by Voonix are
+  never stored.
+
+
+requires:
+  postgres: true
+  postgres_version: "14"
+
+
+connections:
+  - name: voonix_api
+    type: api_key
+    required: true
+    label: Voonix API
+    description: >
+      Your own Voonix address and an API key created inside your Voonix account.
+    fields:
+      - name: base_url
+        label: Voonix address
+        type: url
+        scheme: https
+        required: true
+        description: >
+          The address you log in to Voonix at, e.g. https://yourcompany.voonix.net
+          (not api.voonix.net — that's the documentation site).
+
+      - name: api_key
+        label: API key
+        type: password
+        required: true
+        description: Created in your Voonix account. Stored encrypted.
+
+      - name: history_months
+        label: History to fetch (months)
+        type: number
+        required: false
+        default: 24
+        description: How far back the first sync goes. Raising it later fetches the gap on the next sync.
+
+      - name: resync_months
+        label: Months to re-check every sync
+        type: number
+        required: false
+        default: 3
+        description: Recent months are re-fetched each sync so restated and clawed-back figures are corrected.
+
+      - name: datamonitor_days
+        label: Datamonitor days
+        type: number
+        required: false
+        default: 14
+        description: Days of datamonitor discrepancies to fetch (one API call per day). 0 turns it off.
+
+      - name: allow_writes
+        label: Allow changes in Voonix
+        type: toggle
+        required: false
+        default: false
+        description: >
+          Off by default, so the plugin only reads. Turn it on to let admins
+          create, edit and delete Voonix records from the plugin's tabs —
+          those changes hit your live Voonix account.
+
+
+databases:
+  postgres:
+    table_prefix: voonix_
+    tables:
+      - voonix_affiliate_systems
+      - voonix_advertisers
+      - voonix_logins
+      - voonix_login_history_deals
+      - voonix_campaigns
+      - voonix_campaign_deals
+      - voonix_sites
+      - voonix_payers
+      - voonix_data_validation
+      - voonix_advertiser_earnings
+      - voonix_site_earnings
+      - voonix_invoice_earnings
+      - voonix_payouts
+      - voonix_custom_stats
+      - voonix_datamonitor
+      - voonix_sync_state
+      - voonix_write_log
+
+
+navigation:
+  - label: Overview
+    href: /plugin/voonix-analytics/overview
+    icon: LayoutDashboard
+  - label: Advertiser earnings
+    href: /plugin/voonix-analytics/advertiser-earnings
+    icon: TrendingUp
+  - label: Site earnings
+    href: /plugin/voonix-analytics/site-earnings
+    icon: Globe
+  - label: Invoiceable earnings
+    href: /plugin/voonix-analytics/invoice-earnings
+    icon: FileText
+  - label: Payouts
+    href: /plugin/voonix-analytics/payouts
+    icon: Wallet
+  - label: Custom stats
+    href: /plugin/voonix-analytics/custom-stats
+    icon: BarChart3
+  - label: Advertisers
+    href: /plugin/voonix-analytics/advertisers
+    icon: Users
+  - label: Logins & deals
+    href: /plugin/voonix-analytics/logins
+    icon: UserCheck
+  - label: Campaigns & deals
+    href: /plugin/voonix-analytics/campaigns
+    icon: Target
+  - label: Sites
+    href: /plugin/voonix-analytics/sites
+    icon: Link
+  - label: Payers
+    href: /plugin/voonix-analytics/payers
+    icon: Percent
+  - label: Data quality
+    href: /plugin/voonix-analytics/data-quality
+    icon: AlertTriangle
+  - label: Export
+    href: /plugin/voonix-analytics/export
+    icon: Download
+  - label: Sync
+    href: /plugin/voonix-analytics/sync
+    icon: Activity
+
+
+dashboards:
+  - { name: overview,            label: Overview,             file: dashboards/overview.yaml }
+  - { name: advertiser-earnings, label: Advertiser earnings,  file: dashboards/advertiser-earnings.yaml }
+  - { name: site-earnings,       label: Site earnings,        file: dashboards/site-earnings.yaml }
+  - { name: invoice-earnings,    label: Invoiceable earnings, file: dashboards/invoice-earnings.yaml }
+  - { name: payouts,             label: Payouts,              file: dashboards/payouts.yaml }
+  - { name: custom-stats,        label: Custom stats,         file: dashboards/custom-stats.yaml }
+  - { name: advertisers,         label: Advertisers,          file: dashboards/advertisers.yaml }
+  - { name: logins,              label: Logins & deals,       file: dashboards/logins.yaml }
+  - { name: campaigns,           label: Campaigns & deals,    file: dashboards/campaigns.yaml }
+  - { name: sites,               label: Sites,                file: dashboards/sites.yaml }
+  - { name: payers,              label: Payers,               file: dashboards/payers.yaml }
+  - { name: data-quality,        label: Data quality,         file: dashboards/data-quality.yaml }
+  - { name: export,              label: Export,               file: dashboards/export.yaml }
+  - { name: sync,                label: Sync,                 file: dashboards/sync.yaml }
+
+
+sync:
+  script: src/voonix_analytics_sync.py
+  schedule: "0 */6 * * *"
+  supports_incremental: false
+  execution_mode: async
+  concurrency_policy: skip_if_running
+  # First sync = up to history_months × 5 report calls; allow for slow accounts.
+  timeout_seconds: 7200
+
+
+hooks:
+  on_credentials_saved: hooks.lifecycle:on_credentials_saved
+  on_first_run_success: hooks.lifecycle:on_first_run_success
+
+
+actions:
+  - id: test_connection
+    label: Test connection
+    slot: settings_tab_footer
+    style: secondary
+    icon: check-circle
+    endpoint: POST /api/plugins/voonix-analytics/test-connection
+    disabled_when: no_credentials
+
+  - id: run_sync
+    label: Run sync
+    slot: settings_tab_footer
+    style: primary
+    icon: download
+    endpoint: POST /api/plugins/voonix-analytics/sync-now
+    confirm: "Sync from Voonix now?"
+    disabled_when: sync_in_progress
+
+  - id: backfill_older
+    label: Fetch older history
+    slot: plugin_page_header
+    style: secondary
+    icon: history
+    endpoint: POST /api/plugins/voonix-analytics/backfill
+    confirm: "Fetch another 12 months further back than what is stored? The Sync tab will show whether Voonix had older data."
+    disabled_when: sync_in_progress
+    visible_when: first_sync_success
+
+
+setup_checklist:
+  show_until: all_done
+  items:
+    - id: save_credentials
+      label: Enter your Voonix address and API key
+      done_if: credentials_saved
+    - id: test_connection
+      label: Verify connection — click "Test connection"
+      done_if: last_test_success
+    - id: first_sync
+      label: Run the first sync
+      done_if: first_sync_success
+    - id: schedule_live
+      label: Confirm automatic sync is scheduled
+      done_if: schedule_active
+
+
+frontend:
+  trusted: false
+  needs_consent: true
+  components:
+    - name: TrendCards
+      path: widget/dist/TrendCards.js
+    - name: VoonixReport
+      path: widget/dist/VoonixReport.js
+    - name: VoonixManager
+      path: widget/dist/VoonixManager.js
+    - name: VoonixExport
+      path: widget/dist/VoonixExport.js

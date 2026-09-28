@@ -1,0 +1,17 @@
+# dashboards/campaigns.yaml — Campaigns & deals (VoonixManager widget; resources in src/voonix_analytics_catalog.py).
+title: Campaigns & deals
+db_engine: postgres
+
+panels:
+  - id: manage_campaigns
+    type: custom
+    component: VoonixManager
+    config:
+      resource: campaigns
+
+  - id: manage_campaign_deals
+    type: custom
+    component: VoonixManager
+    config:
+      resource: campaign_deals
+

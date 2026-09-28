@@ -1,0 +1,17 @@
+# dashboards/custom-stats.yaml — custom stats report + manage.
+title: Custom stats
+db_engine: postgres
+
+panels:
+  - id: report
+    type: custom
+    component: VoonixReport
+    config:
+      report: custom_stats
+      default_days: 30
+
+  - id: manage_custom_stats
+    type: custom
+    component: VoonixManager
+    config:
+      resource: custom_stats

@@ -1,0 +1,17 @@
+# dashboards/logins.yaml — Logins & deals (VoonixManager widget; resources in src/voonix_analytics_catalog.py).
+title: Logins & deals
+db_engine: postgres
+
+panels:
+  - id: manage_logins
+    type: custom
+    component: VoonixManager
+    config:
+      resource: logins
+
+  - id: manage_history_deals
+    type: custom
+    component: VoonixManager
+    config:
+      resource: history_deals
+

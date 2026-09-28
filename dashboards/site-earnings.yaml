@@ -1,0 +1,11 @@
+# dashboards/site-earnings.yaml — Site earnings report tab (VoonixReport widget; definition in src/voonix_analytics_catalog.py).
+title: Site earnings
+db_engine: postgres
+
+panels:
+  - id: report
+    type: custom
+    component: VoonixReport
+    config:
+      report: site_earnings
+      default_days: 30

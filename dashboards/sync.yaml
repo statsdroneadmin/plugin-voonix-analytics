@@ -1,0 +1,123 @@
+# dashboards/sync.yaml — sync health, history depth, backfill result, write log.
+title: Sync
+db_engine: postgres
+refresh_seconds: 30
+
+panels:
+  - id: last_sync_age
+    type: stat
+    label: Last successful sync (min ago)
+    live: true
+    refresh_seconds: 30
+    query: >
+      SELECT FLOOR(EXTRACT(EPOCH FROM (now() - MAX(completed_at))) / 60)::bigint AS value
+      FROM job_runs
+      WHERE job_id = 'sync:voonix-analytics' AND status = 'success'
+    fallback_empty: true
+
+  - id: months_stored
+    type: stat
+    label: Months of earnings stored
+    query: SELECT COUNT(DISTINCT period_month) AS value FROM voonix_advertiser_earnings
+    fallback_empty: true
+
+  - id: earnings_rows
+    type: stat
+    label: Earnings rows
+    query: SELECT COUNT(*) AS value FROM voonix_advertiser_earnings
+    fallback_empty: true
+
+  - id: writes_30d
+    type: stat
+    label: Changes sent to Voonix (30 days)
+    query: SELECT COUNT(*) AS value FROM voonix_write_log WHERE created_at >= now() - interval '30 days'
+    fallback_empty: true
+
+  - id: history_state
+    type: table
+    label: History depth and backfill
+    query: >
+      SELECT
+        (SELECT to_char(MIN(period_month), 'YYYY-MM') FROM voonix_advertiser_earnings) AS earliest_month_stored,
+        (SELECT to_char(MIN(period_month), 'YYYY-MM') FROM voonix_advertiser_earnings
+           WHERE clicks > 0 OR commission <> 0 OR signups > 0) AS earliest_month_with_activity,
+        (SELECT value->>'month' FROM voonix_sync_state WHERE key = 'history_floor') AS fetched_back_to,
+        (SELECT value->>'requested' FROM voonix_sync_state WHERE key = 'backfill_request') AS backfill_pending,
+        (SELECT value->>'older_data_found' FROM voonix_sync_state WHERE key = 'backfill_last') AS last_backfill_found_data,
+        (SELECT value->>'rows_found' FROM voonix_sync_state WHERE key = 'backfill_last') AS last_backfill_rows
+    columns:
+      - { key: earliest_month_stored,        label: Earliest month fetched }
+      - { key: earliest_month_with_activity, label: Earliest month with activity }
+      - { key: fetched_back_to,              label: History floor }
+      - { key: backfill_pending,             label: Backfill queued }
+      - { key: last_backfill_found_data,     label: Last backfill found older data }
+      - { key: last_backfill_rows,           label: Rows found }
+    fallback_empty: true
+
+  - id: endpoint_status
+    type: table
+    label: Last result per Voonix endpoint
+    live: true
+    refresh_seconds: 30
+    query: >
+      SELECT substr(key, 10) AS endpoint,
+             CASE WHEN (value->>'ok')::boolean THEN 'OK' ELSE 'Errors' END AS status,
+             value->>'rows' AS rows,
+             value->>'errors' AS errors,
+             value->>'complete' AS complete,
+             left(value->>'last_error', 200) AS last_error,
+             to_char(updated_at, 'YYYY-MM-DD HH24:MI') AS updated
+      FROM voonix_sync_state
+      WHERE starts_with(key, 'endpoint:')
+      ORDER BY 1
+    columns:
+      - { key: endpoint,   label: Endpoint }
+      - { key: status,     label: Status }
+      - { key: rows,       label: Rows }
+      - { key: errors,     label: Errors }
+      - { key: complete,   label: Complete }
+      - { key: last_error, label: Last error }
+      - { key: updated,    label: Updated (UTC) }
+    fallback_empty: true
+
+  - id: recent_runs
+    type: table
+    label: Recent sync runs
+    live: true
+    refresh_seconds: 15
+    query: >
+      SELECT to_char(started_at, 'YYYY-MM-DD HH24:MI') AS started, status,
+             COALESCE(rows_written, 0) AS rows, ROUND(duration_ms / 1000.0) AS seconds,
+             left(COALESCE(error, ''), 200) AS error
+      FROM job_runs
+      WHERE job_id = 'sync:voonix-analytics'
+      ORDER BY started_at DESC
+      LIMIT 15
+    columns:
+      - { key: started, label: Started (UTC) }
+      - { key: status,  label: Status }
+      - { key: rows,    label: Rows, type: number }
+      - { key: seconds, label: Seconds, type: number }
+      - { key: error,   label: Error }
+    fallback_empty: true
+
+  - id: write_log
+    type: table
+    label: Changes sent to Voonix
+    query: >
+      SELECT to_char(created_at, 'YYYY-MM-DD HH24:MI') AS at, actor, resource, op,
+             CASE WHEN ok THEN 'OK' ELSE 'Failed' END AS result,
+             succeeded_count AS succeeded, failed_count AS failed, left(COALESCE(error, ''), 200) AS error
+      FROM voonix_write_log
+      ORDER BY created_at DESC
+      LIMIT 50
+    columns:
+      - { key: at,        label: When (UTC) }
+      - { key: actor,     label: By }
+      - { key: resource,  label: Resource }
+      - { key: op,        label: Operation }
+      - { key: result,    label: Result }
+      - { key: succeeded, label: Succeeded, type: number }
+      - { key: failed,    label: Failed, type: number }
+      - { key: error,     label: Error }
+    fallback_empty: true

@@ -1,0 +1,11 @@
+# dashboards/invoice-earnings.yaml — Invoiceable earnings report tab (VoonixReport widget; definition in src/voonix_analytics_catalog.py).
+title: Invoiceable earnings
+db_engine: postgres
+
+panels:
+  - id: report
+    type: custom
+    component: VoonixReport
+    config:
+      report: invoice_earnings
+      default_days: 30

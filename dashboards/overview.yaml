@@ -1,0 +1,222 @@
+# dashboards/overview.yaml — consolidated Voonix overview.
+#
+# Trend cards compare the current month (to date) against last month.
+# Commission = revshare + CPA + CPL income (extra fee excluded; see migration).
+
+title: Overview
+db_engine: postgres
+refresh_seconds: 60
+
+panels:
+
+  - id: tc_commission
+    type: custom
+    component: TrendCards
+    position: { row: 0, col: 0, width: 1 }
+    config:
+      label: Commission
+      compare_period_label: vs last month (MTD)
+      query: >
+        SELECT to_char(period_month, 'YYYY-MM') AS month, SUM(commission) AS total
+        FROM voonix_advertiser_earnings
+        WHERE period_month >= (date_trunc('month', now()) - interval '12 months')::date
+        GROUP BY 1 ORDER BY 1
+
+  - id: tc_ftd
+    type: custom
+    component: TrendCards
+    position: { row: 0, col: 1, width: 1 }
+    config:
+      label: FTDs
+      compare_period_label: vs last month (MTD)
+      query: >
+        SELECT to_char(period_month, 'YYYY-MM') AS month, SUM(ftd) AS total
+        FROM voonix_advertiser_earnings
+        WHERE period_month >= (date_trunc('month', now()) - interval '12 months')::date
+        GROUP BY 1 ORDER BY 1
+
+  - id: tc_cpa
+    type: custom
+    component: TrendCards
+    position: { row: 0, col: 2, width: 1 }
+    config:
+      label: CPAs
+      compare_period_label: vs last month (MTD)
+      query: >
+        SELECT to_char(period_month, 'YYYY-MM') AS month, SUM(cpa_count) AS total
+        FROM voonix_advertiser_earnings
+        WHERE period_month >= (date_trunc('month', now()) - interval '12 months')::date
+        GROUP BY 1 ORDER BY 1
+
+  - id: tc_clicks
+    type: custom
+    component: TrendCards
+    position: { row: 0, col: 3, width: 1 }
+    config:
+      label: Clicks
+      value_format: compact
+      compare_period_label: vs last month (MTD)
+      query: >
+        SELECT to_char(period_month, 'YYYY-MM') AS month, SUM(clicks) AS total
+        FROM voonix_advertiser_earnings
+        WHERE period_month >= (date_trunc('month', now()) - interval '12 months')::date
+        GROUP BY 1 ORDER BY 1
+
+  - id: tc_signups
+    type: custom
+    component: TrendCards
+    position: { row: 1, col: 0, width: 1 }
+    config:
+      label: Signups
+      compare_period_label: vs last month (MTD)
+      query: >
+        SELECT to_char(period_month, 'YYYY-MM') AS month, SUM(signups) AS total
+        FROM voonix_advertiser_earnings
+        WHERE period_month >= (date_trunc('month', now()) - interval '12 months')::date
+        GROUP BY 1 ORDER BY 1
+
+  - id: tc_net_revenue
+    type: custom
+    component: TrendCards
+    position: { row: 1, col: 1, width: 1 }
+    config:
+      label: Net revenue
+      value_format: compact
+      compare_period_label: vs last month (MTD)
+      query: >
+        SELECT to_char(period_month, 'YYYY-MM') AS month, SUM(net_revenue) AS total
+        FROM voonix_advertiser_earnings
+        WHERE period_month >= (date_trunc('month', now()) - interval '12 months')::date
+        GROUP BY 1 ORDER BY 1
+
+  - id: tc_deposit_value
+    type: custom
+    component: TrendCards
+    position: { row: 1, col: 2, width: 1 }
+    config:
+      label: Deposit value
+      value_format: compact
+      compare_period_label: vs last month (MTD)
+      query: >
+        SELECT to_char(period_month, 'YYYY-MM') AS month, SUM(deposit_value) AS total
+        FROM voonix_advertiser_earnings
+        WHERE period_month >= (date_trunc('month', now()) - interval '12 months')::date
+        GROUP BY 1 ORDER BY 1
+
+  - id: tc_payouts
+    type: custom
+    component: TrendCards
+    position: { row: 1, col: 3, width: 1 }
+    config:
+      label: Payouts
+      value_format: compact
+      compare_period_label: vs last month
+      query: >
+        SELECT to_char(period_month, 'YYYY-MM') AS month, SUM(total) AS total
+        FROM voonix_payouts
+        WHERE period_month >= (date_trunc('month', now()) - interval '12 months')::date
+        GROUP BY 1 ORDER BY 1
+
+  - id: commission_by_month
+    type: line_chart
+    label: Commission by month (24 months)
+    position: { row: 2, col: 0, width: 4 }
+    query: >
+      SELECT to_char(period_month, 'YYYY-MM') AS month, ROUND(SUM(commission), 2) AS commission
+      FROM voonix_advertiser_earnings
+      WHERE period_month >= (date_trunc('month', now()) - interval '23 months')::date
+      GROUP BY 1 ORDER BY 1
+    x_key: month
+    y_key: commission
+    y_label: Commission
+    fallback_empty: true
+
+  - id: top_advertisers_30d
+    type: bar_chart
+    label: Top advertisers by commission (30 days)
+    position: { row: 3, col: 0, width: 2 }
+    query: >
+      SELECT COALESCE(advertiser_name, '(unknown)') AS x, ROUND(SUM(commission), 2) AS y
+      FROM voonix_advertiser_earnings
+      WHERE date >= current_date - 30
+      GROUP BY 1 HAVING SUM(commission) <> 0
+      ORDER BY y DESC LIMIT 10
+    x_key: x
+    y_key: y
+    y_label: Commission
+    fallback_empty: true
+
+  - id: commission_by_system_30d
+    type: bar_chart
+    label: Commission by affiliate system (30 days)
+    position: { row: 3, col: 2, width: 2 }
+    query: >
+      SELECT COALESCE(a.affiliate_system, '(unknown)') AS x, ROUND(SUM(e.commission), 2) AS y
+      FROM voonix_advertiser_earnings e
+      LEFT JOIN voonix_advertisers a ON a.id = e.advertiser_id
+      WHERE e.date >= current_date - 30
+      GROUP BY 1 HAVING SUM(e.commission) <> 0
+      ORDER BY y DESC LIMIT 10
+    x_key: x
+    y_key: y
+    y_label: Commission
+    fallback_empty: true
+
+  - id: top_campaigns_month
+    type: table
+    label: Top campaigns this month
+    position: { row: 4, col: 0, width: 4 }
+    query: >
+      SELECT advertiser_name AS advertiser, campaign_name AS campaign, campaign_key,
+             ROUND(SUM(commission), 2) AS commission, SUM(ftd)::bigint AS ftds,
+             SUM(cpa_count)::bigint AS cpas, SUM(clicks)::bigint AS clicks
+      FROM voonix_advertiser_earnings
+      WHERE period_month = date_trunc('month', now())::date
+      GROUP BY 1, 2, 3
+      ORDER BY commission DESC NULLS LAST
+      LIMIT 15
+    columns:
+      - { key: advertiser,   label: Advertiser }
+      - { key: campaign,     label: Campaign }
+      - { key: campaign_key, label: Key }
+      - { key: commission,   label: Commission, type: number }
+      - { key: ftds,         label: FTDs, type: number }
+      - { key: cpas,         label: CPAs, type: number }
+      - { key: clicks,       label: Clicks, type: number }
+    fallback_empty: true
+
+  - id: logins_with_errors
+    type: table
+    label: Logins with import errors
+    position: { row: 5, col: 0, width: 2 }
+    query: >
+      SELECT advertiser_name AS advertiser, username, affiliate_system AS system, status
+      FROM voonix_logins
+      WHERE error = true
+      ORDER BY advertiser_name, username
+      LIMIT 25
+    columns:
+      - { key: advertiser, label: Advertiser }
+      - { key: username,   label: Username }
+      - { key: system,     label: System }
+      - { key: status,     label: Status }
+    fallback_empty: true
+
+  - id: datamonitor_7d
+    type: table
+    label: Datamonitor issues (7 days)
+    position: { row: 5, col: 2, width: 2 }
+    query: >
+      SELECT COALESCE(advertiser, '(unknown)') AS advertiser, metric, COUNT(*) AS issues,
+             ROUND(SUM(difference), 2) AS difference
+      FROM voonix_datamonitor
+      WHERE date >= current_date - 7
+      GROUP BY 1, 2
+      ORDER BY issues DESC
+      LIMIT 25
+    columns:
+      - { key: advertiser, label: Advertiser }
+      - { key: metric,     label: Metric }
+      - { key: issues,     label: Issues, type: number }
+      - { key: difference, label: Difference, type: number }
+    fallback_empty: true

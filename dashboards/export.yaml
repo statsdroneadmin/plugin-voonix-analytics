@@ -1,0 +1,9 @@
+# dashboards/export.yaml — full data export (VoonixExport widget; formats in src/voonix_analytics_export.py).
+title: Export
+db_engine: postgres
+
+panels:
+  - id: export
+    type: custom
+    component: VoonixExport
+    config: {}

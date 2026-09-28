@@ -1,0 +1,23 @@
+# dashboards/data-quality.yaml — datamonitor discrepancies, per-login column coverage, supported systems.
+title: Data quality
+db_engine: postgres
+
+panels:
+  - id: datamonitor
+    type: custom
+    component: VoonixReport
+    config:
+      report: datamonitor
+      default_days: 14
+
+  - id: data_validation
+    type: custom
+    component: VoonixManager
+    config:
+      resource: data_validation
+
+  - id: affiliate_systems
+    type: custom
+    component: VoonixManager
+    config:
+      resource: affiliate_systems

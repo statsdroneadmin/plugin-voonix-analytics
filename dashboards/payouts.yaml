@@ -1,0 +1,11 @@
+# dashboards/payouts.yaml — Payouts report tab (VoonixReport widget; definition in src/voonix_analytics_catalog.py).
+title: Payouts
+db_engine: postgres
+
+panels:
+  - id: report
+    type: custom
+    component: VoonixReport
+    config:
+      report: payouts
+      default_days: 365
